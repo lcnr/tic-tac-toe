@@ -115,9 +115,22 @@ impl Game {
     /// let mut game = Game::new(2, 3);
     /// # let _ = &mut game;
     /// ```
+    /// 
+    /// # Panics
+    /// 
+    /// This function may panic if there are either too many dimensions of too many states.
+    /// The amount of states is equal to `board_size.pow(dimensions)`.
     pub fn new(dimensions: usize, board_size: usize) -> Self {
         assert_ne!(board_size, 0);
         assert_ne!(dimensions, 0);
+        assert!(
+            3usize.checked_pow(dimensions as u32).is_some(),
+            "Unable handle this many dimensions"
+        );
+        assert!(
+            board_size.checked_pow(dimensions as u32).is_some(),
+            "Unable to create a game with more than usize::max_value() states"
+        );
 
         let state_count = board_size.pow(dimensions as u32);
         let states = vec![None; state_count].into_boxed_slice();
@@ -199,7 +212,7 @@ impl Game {
                         }
 
                         sub_dim += 1;
-                        others = others / 3;
+                        others /= 3;
                     }
 
                     if self.at(&pos) != Some(player) {
